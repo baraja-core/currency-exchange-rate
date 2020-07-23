@@ -35,7 +35,7 @@ final class CurrencyExchangeRateManager
 	public function getRate(string $code): float
 	{
 		if (isset(($list = $this->getList())[$code = strtoupper($code)]) === true) {
-			return (float) $list[$code]['rate'];
+			return $list[$code]->getRate();
 		}
 
 		throw new \InvalidArgumentException(
