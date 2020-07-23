@@ -1,0 +1,2 @@
+services:
+	- Baraja\CurrencyExchangeRate\CurrencyExchangeRateManager
