@@ -77,13 +77,17 @@ final class CurrencyExchangeRateManager
 
 	private function loadApi(): string
 	{
-		if (strncmp($this->apiUrl, 'https://', 8) !== 0) {
-			throw new \RuntimeException('API URL must be secured. URL "' . $this->apiUrl . '" given.');
-		}
-		if (($response = trim(Strings::normalize((string) file_get_contents($this->apiUrl)))) === '') {
-			throw new \RuntimeException('API response is empty. Is URL "' . $this->apiUrl . '" callable?');
+		static $cache;
+
+		if ($cache === null) {
+			if (strncmp($this->apiUrl, 'https://', 8) !== 0) {
+				throw new \RuntimeException('API URL must be secured. URL "' . $this->apiUrl . '" given.');
+			}
+			if (($cache = trim(Strings::normalize((string) file_get_contents($this->apiUrl)))) === '') {
+				throw new \RuntimeException('API response is empty. Is URL "' . $this->apiUrl . '" callable?');
+			}
 		}
 
-		return $response;
+		return $cache;
 	}
 }
