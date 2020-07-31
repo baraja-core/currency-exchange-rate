@@ -45,6 +45,19 @@ final class CurrencyExchangeRateManager
 	}
 
 
+	public function isCurrencySupported(string $code): bool
+	{
+		try {
+			if ($this->getRate($code) > 0) {
+				return true;
+			}
+		} catch (\Throwable $e) {
+		}
+
+		return false;
+	}
+
+
 	/**
 	 * @internal
 	 * @param string $apiUrl
