@@ -47,6 +47,10 @@ final class CurrencyExchangeRateManager
 
 	public function isCurrencySupported(string $code): bool
 	{
+		if ($code === 'CZK') {
+			return true;
+		}
+
 		try {
 			if ($this->getRate($code) > 0) {
 				return true;
