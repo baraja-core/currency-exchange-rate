@@ -10,9 +10,7 @@ use Nette\Utils\Validators;
 
 final class CurrencyExchangeRateManager
 {
-
-	/** @var string */
-	private $apiUrl = 'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt';
+	private string $apiUrl = 'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt';
 
 
 	/**
@@ -50,7 +48,6 @@ final class CurrencyExchangeRateManager
 		if ($code === 'CZK') {
 			return true;
 		}
-
 		try {
 			if ($this->getRate($code) > 0) {
 				return true;
@@ -64,8 +61,6 @@ final class CurrencyExchangeRateManager
 
 	/**
 	 * @internal
-	 * @param string $apiUrl
-	 * @return self
 	 */
 	public function setApiUrl(string $apiUrl): self
 	{
@@ -82,7 +77,6 @@ final class CurrencyExchangeRateManager
 	private function loadApi(): string
 	{
 		static $cache;
-
 		if ($cache === null) {
 			if (strncmp($this->apiUrl, 'https://', 8) !== 0) {
 				throw new \RuntimeException('API URL must be secured. URL "' . $this->apiUrl . '" given.');

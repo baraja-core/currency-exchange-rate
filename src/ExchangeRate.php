@@ -7,18 +7,13 @@ namespace Baraja\CurrencyExchangeRate;
 
 final class ExchangeRate
 {
+	private string $country;
 
-	/** @var string */
-	private $country;
+	private string $currency;
 
-	/** @var string */
-	private $currency;
+	private string $code;
 
-	/** @var string */
-	private $code;
-
-	/** @var float */
-	private $rate;
+	private float $rate;
 
 
 	public function __construct(string $country, string $currency, string $code, float $rate)
