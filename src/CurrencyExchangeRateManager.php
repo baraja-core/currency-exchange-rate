@@ -38,7 +38,7 @@ final class CurrencyExchangeRateManager
 
 		throw new \InvalidArgumentException(
 			'Currency rate for code "' . $code . '" does not exist. '
-			. 'Did you mean "' . implode('", "', array_keys($list)) . '"?'
+			. 'Did you mean "' . implode('", "', array_keys($list)) . '"?',
 		);
 	}
 
