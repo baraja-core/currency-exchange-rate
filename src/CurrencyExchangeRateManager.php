@@ -20,7 +20,7 @@ final class CurrencyExchangeRateManager
 	{
 		$return = [];
 		foreach (explode("\n", $this->loadApi()) as $line) {
-			if ((bool) preg_match('/^\d$/', $line[0]) === false && Strings::upper($line[0]) === $line[0]) {
+			if ((bool) preg_match('/^\d$/', $line[0]) === false && strtoupper($line[0]) === $line[0]) {
 				[$country, $currency, $quantity, $code, $rate] = explode('|', $line);
 				$return[$code] = new ExchangeRate($country, $currency, $code, (float) ((float) str_replace(',', '.', $rate) / (int) $quantity));
 			}
