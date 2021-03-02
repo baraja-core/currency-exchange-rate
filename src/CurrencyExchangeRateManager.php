@@ -64,7 +64,8 @@ final class CurrencyExchangeRateManager
 		?bool $preferParsedCurrency = null
 	): float {
 		if (is_string($price)) { // price can contain basic currency like "10 EUR"
-			if (preg_match('/^([\d.]*)\s*([A-Z]{3})$/', str_replace(',', '.', strtoupper(trim($price))), $priceParser)) {
+			$price = (string) str_replace(',', '.', strtoupper(trim($price)));
+			if (preg_match('/^([\d.]*)\s*([A-Z]{3})$/', $price, $priceParser)) {
 				$pricePart = ($priceParser[1] ?? throw new \RuntimeException('Price must exist.'));
 				$price = (float) ($pricePart === '' ? 1 : $pricePart);
 				$currentPart = $priceParser[2] ?? throw new \RuntimeException('Currency must exist.');
