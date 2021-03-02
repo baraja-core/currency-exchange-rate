@@ -5,12 +5,24 @@ declare(strict_types=1);
 namespace Baraja\CurrencyExchangeRate;
 
 
+use Nette\Caching\Cache;
+use Nette\Caching\Storage;
 use Nette\Utils\Strings;
 use Nette\Utils\Validators;
 
 final class CurrencyExchangeRateManager
 {
 	private string $apiUrl = 'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt';
+
+	private ?Cache $cache = null;
+
+
+	public function __construct(?Storage $storage = null)
+	{
+		if ($storage !== null) {
+			$this->cache = new Cache($storage, 'baraja-currency-exchange-rate');
+		}
+	}
 
 
 	/**
@@ -77,12 +89,27 @@ final class CurrencyExchangeRateManager
 	private function loadApi(): string
 	{
 		static $cache;
+		if ($this->cache !== null) {
+			try {
+				$cache = $this->cache->load('api');
+			} catch (\Throwable) {
+			}
+		}
 		if ($cache === null) {
 			if (strncmp($this->apiUrl, 'https://', 8) !== 0) {
 				throw new \RuntimeException('API URL must be secured. URL "' . $this->apiUrl . '" given.');
 			}
-			if (($cache = trim(Strings::normalize((string) file_get_contents($this->apiUrl)))) === '') {
+			$cache = trim(Strings::normalize((string) file_get_contents($this->apiUrl)));
+			if ($cache === '') {
 				throw new \RuntimeException('API response is empty. Is URL "' . $this->apiUrl . '" callable?');
+			}
+			if ($this->cache !== null) {
+				try {
+					$cache = $this->cache->save('api', $cache, [
+						Cache::EXPIRATION => '4 hours',
+					]);
+				} catch (\Throwable) {
+				}
 			}
 		}
 
