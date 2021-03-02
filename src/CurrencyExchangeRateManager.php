@@ -68,12 +68,13 @@ final class CurrencyExchangeRateManager
 					throw new \InvalidArgumentException(
 						'The input currency is ambiguous. '
 						. 'The parameter states that the input is in "' . $currentCurrency . '", '
-						. 'but the price is in "' . $currentPart . '".'
+						. 'but the price is in "' . $currentPart . '".',
 					);
 				}
 			} else {
 				throw new \InvalidArgumentException(
-					'Invalid price format, because haystack "' . $price . '" given. Did you mean format like "10.3EUR"?'
+					'Invalid price format, because haystack "' . $price . '" given. '
+					. 'Did you mean format like "10.3EUR"?',
 				);
 			}
 		}
