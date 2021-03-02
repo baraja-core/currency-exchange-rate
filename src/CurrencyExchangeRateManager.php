@@ -28,11 +28,15 @@ final class CurrencyExchangeRateManager
 	 */
 	public function getList(): array
 	{
-		$return = [];
-		foreach (explode("\n", $this->loadApi()) as $line) {
-			if ((bool) preg_match('/^\d$/', $line[0]) === false && strtoupper($line[0]) === $line[0]) {
-				[$country, $currency, $quantity, $code, $rate] = explode('|', $line);
-				$return[$code] = new ExchangeRate($country, $currency, $code, (float) ((float) str_replace(',', '.', $rate) / (int) $quantity));
+		static $return;
+
+		if ($return === null) {
+			$return = [];
+			foreach (explode("\n", $this->loadApi()) as $line) {
+				if ((bool) preg_match('/^\d$/', $line[0]) === false && strtoupper($line[0]) === $line[0]) {
+					[$country, $currency, $quantity, $code, $rate] = explode('|', $line);
+					$return[$code] = new ExchangeRate($country, $currency, $code, (float) ((float) str_replace(',', '.', $rate) / (int) $quantity));
+				}
 			}
 		}
 
@@ -139,13 +143,13 @@ final class CurrencyExchangeRateManager
 	private function loadApi(): string
 	{
 		static $cache;
-		if ($this->cache !== null) {
-			try {
-				$cache = $this->cache->load('api');
-			} catch (\Throwable) {
-			}
-		}
 		if ($cache === null) {
+			if ($this->cache !== null) {
+				try {
+					$cache = $this->cache->load('api');
+				} catch (\Throwable) {
+				}
+			}
 			if (strncmp($this->apiUrl, 'https://', 8) !== 0) {
 				throw new \RuntimeException('API URL must be secured. URL "' . $this->apiUrl . '" given.');
 			}
