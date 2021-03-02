@@ -9,8 +9,7 @@
 		}
 	],
 	"require": {
-		"php": "^8.0",
-		"nette/utils": "^3.2"
+		"php": "^8.0"
 	},
 	"require-dev": {
 		"nette/caching": "^3.0",

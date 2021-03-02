@@ -7,8 +7,6 @@ namespace Baraja\CurrencyExchangeRate;
 
 use Nette\Caching\Cache;
 use Nette\Caching\Storage;
-use Nette\Utils\Strings;
-use Nette\Utils\Validators;
 
 final class CurrencyExchangeRateManager
 {
@@ -76,7 +74,24 @@ final class CurrencyExchangeRateManager
 	 */
 	public function setApiUrl(string $apiUrl): self
 	{
-		if (Validators::isUrl($apiUrl) === false) {
+		$alpha = "a-z\x80-\xFF";
+		$isUrl = (bool) preg_match(<<<XX
+		(^
+			https?://(
+				(([-_0-9$alpha]+\\.)*                       # subdomain
+					[0-9$alpha]([-0-9$alpha]{0,61}[0-9$alpha])?\\.)?  # domain
+					[$alpha]([-0-9$alpha]{0,17}[$alpha])?   # top domain
+				|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}  # IPv4
+				|\\[[0-9a-f:]{3,39}\\]                      # IPv6
+			)(:\\d{1,5})?                                   # port
+			(/\\S*)?                                        # path
+			(\\?\\S*)?                                      # query
+			(\\#\\S*)?                                      # fragment
+		$)Dix
+XX
+			, $apiUrl);
+
+		if ($isUrl === false) {
 			throw new \InvalidArgumentException('Haystack "' . $apiUrl . '" is not valid URL.');
 		}
 
@@ -99,7 +114,7 @@ final class CurrencyExchangeRateManager
 			if (strncmp($this->apiUrl, 'https://', 8) !== 0) {
 				throw new \RuntimeException('API URL must be secured. URL "' . $this->apiUrl . '" given.');
 			}
-			$cache = trim(Strings::normalize((string) file_get_contents($this->apiUrl)));
+			$cache = trim($this->normalize((string) file_get_contents($this->apiUrl)));
 			if ($cache === '') {
 				throw new \RuntimeException('API response is empty. Is URL "' . $this->apiUrl . '" callable?');
 			}
@@ -114,5 +129,27 @@ final class CurrencyExchangeRateManager
 		}
 
 		return $cache;
+	}
+
+
+	private function normalize(string $s): string
+	{
+		// convert to compressed normal form (NFC)
+		if (class_exists('Normalizer', false) && ($n = \Normalizer::normalize($s, \Normalizer::FORM_C)) !== false) {
+			$s = (string) $n;
+		}
+
+		$s = str_replace(["\r\n", "\r"], "\n", $s);
+
+		// remove control characters; leave \t + \n
+		$s = (string) preg_replace('#[\x00-\x08\x0B-\x1F\x7F-\x9F]+#u', '', $s);
+
+		// right trim
+		$s = (string) preg_replace('#[\t ]+$#m', '', $s);
+
+		// leading and trailing blank lines
+		$s = trim($s, "\n");
+
+		return $s;
 	}
 }
