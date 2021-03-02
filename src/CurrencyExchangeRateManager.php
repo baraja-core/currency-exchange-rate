@@ -76,19 +76,19 @@ final class CurrencyExchangeRateManager
 	{
 		$alpha = "a-z\x80-\xFF";
 		$isUrl = (bool) preg_match(<<<XX
-		(^
-			https?://(
-				(([-_0-9$alpha]+\\.)*                       # subdomain
-					[0-9$alpha]([-0-9$alpha]{0,61}[0-9$alpha])?\\.)?  # domain
-					[$alpha]([-0-9$alpha]{0,17}[$alpha])?   # top domain
-				|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}  # IPv4
-				|\\[[0-9a-f:]{3,39}\\]                      # IPv6
-			)(:\\d{1,5})?                                   # port
-			(/\\S*)?                                        # path
-			(\\?\\S*)?                                      # query
-			(\\#\\S*)?                                      # fragment
-		$)Dix
-XX
+					(^
+						https?://(
+							(([-_0-9$alpha]+\\.)*                       # subdomain
+								[0-9$alpha]([-0-9$alpha]{0,61}[0-9$alpha])?\\.)?  # domain
+								[$alpha]([-0-9$alpha]{0,17}[$alpha])?   # top domain
+							|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}  # IPv4
+							|\\[[0-9a-f:]{3,39}\\]                      # IPv6
+						)(:\\d{1,5})?                                   # port
+						(/\\S*)?                                        # path
+						(\\?\\S*)?                                      # query
+						(\\#\\S*)?                                      # fragment
+					$)Dix
+			XX
 			, $apiUrl);
 
 		if ($isUrl === false) {
