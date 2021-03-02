@@ -53,6 +53,41 @@ final class CurrencyExchangeRateManager
 	}
 
 
+	public function getPrice(float|string $price, string $expectedCurrency, ?string $currentCurrency = null): float
+	{
+		if (is_string($price)) { // price can contain basic currency like "10 EUR"
+			if (preg_match('/^([\d,.]*)\s*([A-Z]{3})$/', strtoupper(trim($price)), $priceParser)) {
+				$pricePart = ($priceParser[1] ?? throw new \RuntimeException('Price must exist.'));
+				$price = (float) ($pricePart === '' ? 1 : $pricePart);
+				$currentPart = $priceParser[2] ?? throw new \RuntimeException('Currency must exist.');
+				if ($currentCurrency !== null && $currentPart !== $currentCurrency) {
+					throw new \InvalidArgumentException(
+						'The input currency is ambiguous. '
+						. 'The parameter states that the input is in "' . $currentCurrency . '", '
+						. 'but the price is in "' . $currentPart . '".'
+					);
+				}
+			} else {
+				throw new \InvalidArgumentException(
+					'Invalid price format, because haystack "' . $price . '" given. Did you mean format like "10.3EUR"?'
+				);
+			}
+		}
+		if ($currentCurrency === null) {
+			$currentCurrency = 'CZK';
+		}
+
+		$baseRate = $currentCurrency === 'CZK'
+			? 1
+			: $this->getRate($currentCurrency);
+		$rate = $expectedCurrency === 'CZK'
+			? 1
+			: $this->getRate($expectedCurrency);
+
+		return $price * $baseRate / $rate;
+	}
+
+
 	public function isCurrencySupported(string $code): bool
 	{
 		if ($code === 'CZK') {
