@@ -7,21 +7,12 @@ namespace Baraja\CurrencyExchangeRate;
 
 final class ExchangeRate
 {
-	private string $country;
-
-	private string $currency;
-
-	private string $code;
-
-	private float $rate;
-
-
-	public function __construct(string $country, string $currency, string $code, float $rate)
-	{
-		$this->country = $country;
-		$this->currency = $currency;
-		$this->code = $code;
-		$this->rate = $rate;
+	public function __construct(
+		private string $country,
+		private string $currency,
+		private string $code,
+		private float $rate
+	) {
 	}
 
 
