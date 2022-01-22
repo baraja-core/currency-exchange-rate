@@ -8,6 +8,11 @@ namespace Baraja\CurrencyExchangeRate;
 use Nette\Caching\Cache;
 use Nette\Caching\Storage;
 
+/**
+ * Original implementation for currency conversion.
+ *
+ * @deprecated since 2022-01-22, use ExchangeRateConvertor from baraja-core/shop-currency
+ */
 final class CurrencyExchangeRateManager
 {
 	private string $apiUrl = 'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt';
@@ -46,14 +51,17 @@ final class CurrencyExchangeRateManager
 
 	public function getRate(string $code): float
 	{
-		if (isset(($list = $this->getList())[$code = strtoupper($code)]) === true) {
+		$list = $this->getList();
+		$code = strtoupper($code);
+		if (isset($list[$code]) === true) {
 			return $list[$code]->getRate();
 		}
 
-		throw new \InvalidArgumentException(
-			'Currency rate for code "' . $code . '" does not exist. '
-			. 'Did you mean "' . implode('", "', array_keys($list)) . '"?',
-		);
+		throw new \InvalidArgumentException(sprintf(
+			'Currency rate for code "%s" does not exist. Did you mean "%s"?',
+			$code,
+			implode('", "', array_keys($list)),
+		));
 	}
 
 
@@ -63,31 +71,32 @@ final class CurrencyExchangeRateManager
 		?string $currentCurrency = null,
 		?bool $preferParsedCurrency = null
 	): float {
-		if (is_string($price)) { // price can contain basic currency like "10 EUR"
+		if (is_string($price)) { // price can contain numeric-string or value with currency like "10 EUR"
 			$price = (string) str_replace(',', '.', strtoupper(trim($price)));
-			if (preg_match('/^([\d.]*)\s*([A-Z]{3})$/', $price, $priceParser)) {
+			if (preg_match('/^([\d.]+)(\s*[A-Z]{3})?$/', $price, $priceParser) === 1) {
 				$pricePart = ($priceParser[1] ?? throw new \RuntimeException('Price must exist.'));
-				$price = (float) ($pricePart === '' ? 1 : $pricePart);
-				$currentPart = $priceParser[2] ?? throw new \RuntimeException('Currency must exist.');
-				if ($currentCurrency === null) {
-					$currentCurrency = $currentPart;
-				} elseif ($currentPart !== $currentCurrency) {
+				$price = $pricePart === '' ? '1' : $pricePart;
+				$currencyPart = trim($priceParser[2] ?? '');
+				if ($currencyPart === '') { // numeric-string
+					if ($currentCurrency === null) {
+						throw new \InvalidArgumentException('Current currency is mandatory.');
+					}
+				} elseif ($currentCurrency === null) {
+					$currentCurrency = $currencyPart;
+				} elseif ($currencyPart !== $currentCurrency) {
 					if ($preferParsedCurrency === null) {
-						throw new \InvalidArgumentException(
-							'The input currency is ambiguous. '
-							. 'The parameter states that the input is in "' . $currentCurrency . '", '
-							. 'but the price is in "' . $currentPart . '".',
-						);
+						throw new \InvalidArgumentException(sprintf(
+							'The input currency is ambiguous. The parameter states that the input is in "%s", but the price is in "%s".',
+							$currentCurrency,
+							$currencyPart,
+						));
 					}
 					if ($preferParsedCurrency === true) {
-						$currentCurrency = $currentPart;
+						$currentCurrency = $currencyPart;
 					}
 				}
 			} else {
-				throw new \InvalidArgumentException(
-					'Invalid price format, because haystack "' . $price . '" given. '
-					. 'Did you mean format like "10.3EUR"?',
-				);
+				throw new \InvalidArgumentException(sprintf('Invalid price format, because haystack "%s" given. Did you mean format like "10.3EUR"?', $price));
 			}
 		}
 		if ($currentCurrency === null) {
@@ -160,6 +169,8 @@ final class CurrencyExchangeRateManager
 			if ($this->cache !== null) {
 				try {
 					$cache = $this->cache->load('api');
+
+					return $cache;
 				} catch (\Throwable) {
 				}
 			}
@@ -172,7 +183,7 @@ final class CurrencyExchangeRateManager
 			}
 			if ($this->cache !== null) {
 				try {
-					$cache = $this->cache->save('api', $cache, [
+					$this->cache->save('api', $cache, [
 						Cache::EXPIRATION => '4 hours',
 					]);
 				} catch (\Throwable) {
