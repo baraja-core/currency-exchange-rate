@@ -69,7 +69,7 @@ final class CurrencyExchangeRateManager
 		float|string $price,
 		string $expectedCurrency,
 		?string $currentCurrency = null,
-		?bool $preferParsedCurrency = null
+		?bool $preferParsedCurrency = null,
 	): float {
 		if (is_string($price)) { // price can contain numeric-string or value with currency like "10 EUR"
 			$price = (string) str_replace(',', '.', strtoupper(trim($price)));

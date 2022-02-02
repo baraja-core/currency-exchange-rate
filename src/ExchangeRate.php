@@ -11,7 +11,7 @@ final class ExchangeRate
 		private string $country,
 		private string $currency,
 		private string $code,
-		private float $rate
+		private float $rate,
 	) {
 	}
 
