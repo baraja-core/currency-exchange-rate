@@ -40,7 +40,7 @@ final class CurrencyExchangeRateManager
 			foreach (explode("\n", $this->loadApi()) as $line) {
 				if ((bool) preg_match('/^\d$/', $line[0]) === false && strtoupper($line[0]) === $line[0]) {
 					[$country, $currency, $quantity, $code, $rate] = explode('|', $line);
-					$return[$code] = new ExchangeRate($country, $currency, $code, (float) ((float) str_replace(',', '.', $rate) / (int) $quantity));
+					$return[$code] = new ExchangeRate($country, $currency, $code, (float) str_replace(',', '.', $rate) / (int) $quantity);
 				}
 			}
 		}
@@ -72,7 +72,7 @@ final class CurrencyExchangeRateManager
 		?bool $preferParsedCurrency = null,
 	): float {
 		if (is_string($price)) { // price can contain numeric-string or value with currency like "10 EUR"
-			$price = (string) str_replace(',', '.', strtoupper(trim($price)));
+			$price = str_replace(',', '.', strtoupper(trim($price)));
 			if (preg_match('/^([\d.]+)(\s*[A-Z]{3})?$/', $price, $priceParser) === 1) {
 				$pricePart = ($priceParser[1] ?? throw new \RuntimeException('Price must exist.'));
 				$price = $pricePart === '' ? '1' : $pricePart;
@@ -199,7 +199,7 @@ final class CurrencyExchangeRateManager
 	{
 		// convert to compressed normal form (NFC)
 		if (class_exists('Normalizer', false) && ($n = \Normalizer::normalize($s, \Normalizer::FORM_C)) !== false) {
-			$s = (string) $n;
+			$s = $n;
 		}
 
 		$s = str_replace(["\r\n", "\r"], "\n", $s);
