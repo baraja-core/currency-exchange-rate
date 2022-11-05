@@ -74,7 +74,7 @@ final class CurrencyExchangeRateManager
 		if (is_string($price)) { // price can contain numeric-string or value with currency like "10 EUR"
 			$price = str_replace(',', '.', strtoupper(trim($price)));
 			if (preg_match('/^([\d.]+)(\s*[A-Z]{3})?$/', $price, $priceParser) === 1) {
-				$pricePart = ($priceParser[1] ?? throw new \RuntimeException('Price must exist.'));
+				$pricePart = $priceParser[1] ?? throw new \RuntimeException('Price must exist.');
 				$price = $pricePart === '' ? '1' : $pricePart;
 				$currencyPart = trim($priceParser[2] ?? '');
 				if ($currencyPart === '') { // numeric-string
@@ -110,7 +110,7 @@ final class CurrencyExchangeRateManager
 			? 1
 			: $this->getRate($expectedCurrency);
 
-		return $price * $baseRate / $rate;
+		return ((float) $price) * $baseRate / $rate;
 	}
 
 
